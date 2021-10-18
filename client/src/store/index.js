@@ -129,7 +129,6 @@ export const useGlobalStore = () => {
             let response = await api.createTop5List(newList);
             if (response.data.success) {
                 let newListID = response.data.top5List._id
-                //store.setCurrentList(newListID);
                 async function asyncGetListName(newListID) {
                     let response = await api.getTop5ListById(newListID);
                     if (response.data.success) {
@@ -145,7 +144,8 @@ export const useGlobalStore = () => {
                                         newListCounter: store.newListCounter + 1,
                                         currentList: top5List
                                     }
-                                })
+                                });
+                                store.history.push("/top5list/" + newListID);
                             }
                         }
                         getListPairs(top5List);
