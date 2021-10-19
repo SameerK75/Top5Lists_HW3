@@ -392,6 +392,14 @@ export const useGlobalStore = () => {
         })
     }
 
+    // THESE FUNCTIONS CHECK FOR TRANSACTIONS TO UNDO/REDO
+    store.hasUndo = function () {
+        return tps.hasTransactionToUndo();
+    }
+
+    store.hasRedo = function () {
+        return tps.hasTransactionToRedo();
+    }
 
     // THIS GIVES OUR STORE AND ITS REDUCER TO ANY COMPONENT THAT NEEDS IT
     return { store, storeReducer };

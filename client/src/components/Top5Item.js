@@ -74,6 +74,11 @@ function Top5Item(props) {
         setText(event.target.value);
     }
 
+    let listStatus = false;
+    if(store.isItemEditActive) {
+        listStatus = true;
+    }
+
     let { index} = props;
     let itemClass = "top5-item";
     if (draggedTo) {
@@ -96,6 +101,7 @@ function Top5Item(props) {
                 className="list-card-button"
                 value={"\u270E"}
                 onClick = {handleToggleEdit}
+                disabled = {listStatus}
             />
             {props.text}
         </div>;
