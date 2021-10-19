@@ -109,7 +109,7 @@ function Top5Item(props) {
                 onKeyPress = {handleKeyPress}
                 onChange = {handleUpdateText}
                 defaultValue = {props.text}
-            />
+            />  
     }
     return (
         itemElement)

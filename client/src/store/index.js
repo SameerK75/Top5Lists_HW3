@@ -20,7 +20,9 @@ export const GlobalStoreActionType = {
     SET_CURRENT_LIST: "SET_CURRENT_LIST",
     SET_LIST_NAME_EDIT_ACTIVE: "SET_LIST_NAME_EDIT_ACTIVE",
     SET_ITEM_EDIT_ACTIVE: "SET_ITEM_EDIT_ACTIVE",
-    ADD_NEW_LIST: "ADD_NEW_LIST"
+    ADD_NEW_LIST: "ADD_NEW_LIST",
+    MARK_LIST_FOR_DELETION: "MARK_LIST_FOR_DELETION",
+    DELETE_LIST: "DELETE_LIST"
 }
 
 // WE'LL NEED THIS TO PROCESS TRANSACTIONS
@@ -121,6 +123,28 @@ export const useGlobalStore = () => {
                     listMarkedForDeletion: null
                 });
             }
+            // MARK A LIST FOR DELETION
+            case GlobalStoreActionType.MARK_LIST_FOR_DELETION: {
+                return setStore({
+                    idNamePairs: store.idNamePairs,
+                    currentList: store.currentList,
+                    newListCounter: store.newListCounter,
+                    isListNameEditActive: false,
+                    isItemEditActive: false,
+                    listMarkedForDeletion: payload
+                })
+            }
+            // DELETE A LIST 
+            case GlobalStoreActionType.DELETE_LIST: {
+                return setStore({
+                    idNamePairs: payload,
+                    currentList: store.currentList,
+                    newListCounter: store.newListCounter,
+                    isListNameEditActive: false,
+                    isItemEditActive: false,
+                    listMarkedForDeletion: null
+                })
+            }
             default:
                 return store;
         }
@@ -209,6 +233,7 @@ export const useGlobalStore = () => {
             type: GlobalStoreActionType.CLOSE_CURRENT_LIST,
             payload: {}
         });
+        tps.clearAllTransactions();
     }
 
     // THIS FUNCTION LOADS ALL THE ID, NAME PAIRS SO WE CAN LIST ALL THE LISTS
@@ -227,6 +252,53 @@ export const useGlobalStore = () => {
             }
         }
         asyncLoadIdNamePairs();
+    }
+    // THIS FUNCTION DISPLAYS THE DELETE MODAL
+    store.showDeleteListModal = function() {
+        let modal = document.getElementById("delete-modal")
+        modal.classList.add("is-visible");
+    }
+
+    // THIS FUNCTION HIDES THE DELETE MODAL
+    store.hideDeleteListModal = function() {
+        let modal = document.getElementById("delete-modal")
+        modal.classList.remove("is-visible");
+    }
+
+    // THIS FUNCTION MARKS A LIST FOR DELETION
+    store.markDeleteList = function(id) {
+        async function asyncGetList(id) {
+            let response = await api.getTop5ListById(id);
+            if (response.data.success) {
+                let listToDelete = response.data.top5List;
+
+                storeReducer({
+                    type: GlobalStoreActionType.MARK_LIST_FOR_DELETION,
+                    payload: listToDelete
+                });
+            }
+        }
+        asyncGetList(id);
+    }
+
+    // THIS FUNCTION DELETES A LIST
+    store.deleteMarkedList = function() {
+        async function asyncDeleteList() {
+            let deleteID = store.listMarkedForDeletion._id
+            let response = await api.deleteTop5ListById(deleteID);
+            if (response.data.success) {
+                async function getListPairs() {
+                    let response = await api.getTop5ListPairs();
+                    let pairsArray = response.data.idNamePairs;
+                    storeReducer({
+                        type: GlobalStoreActionType.DELETE_LIST,
+                        payload: pairsArray
+                    })
+                }
+                getListPairs(); 
+            } 
+        }
+        asyncDeleteList();
     }
 
     // THE FOLLOWING 8 FUNCTIONS ARE FOR COORDINATING THE UPDATING
